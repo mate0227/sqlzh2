@@ -1,0 +1,91 @@
+--Kiss Máté IFI2ZX
+--1. feladat
+
+create table Pizza(
+    azon number(3) Primary key,
+    elnevezes varchar(50) not null,
+    ar number(10) constraint ar_check
+check(ar <= 1000),
+    meret number(10) constraint meret_check
+check(meret between 33 and 50)
+);
+
+
+create table megrendelo(
+    azon number(3) primary key,
+    telefonszam varchar(50),
+    nev varchar(50),
+    cim number(10)
+);
+
+
+create table megrendeles(
+    megrendeles_datum date,
+    kiszallitas_datum date
+);
+
+drop table megrendeles purge;
+
+
+alter table megrendeles add constraint
+datum_check
+check(kiszallitas_datum > megrendeles_datum);
+
+--2. feladat
+
+alter table megrendeles add azon number(3);
+
+alter table megrendeles add foreign key(azon) references Pizza(azon);
+alter table megrendeles add foreign key(azon) references megrendelo(azon);
+
+alter table megrendeles add constraint azzon
+primary key(azon, megrendeles_datum);
+
+--3. feladat
+
+insert into megrendelo values(1, '+36305527094', 'Kovács Péter',4400);
+insert into megrendelo values(2, '+36307227963', 'Nagy Bendegúz',4500);
+insert into megrendelo values(3, '+36305227297', 'Gincsai Levente',4300);
+insert into megrendelo values(4, '+36386327356', 'Szakács István ',4200);
+insert into megrendelo values(5, '+36365537594', 'Subert Fanni',4100);
+
+insert into Pizza values(1,'margarita',400,33);
+insert into Pizza values(2,'sonkaskukoricas',700,50);
+insert into Pizza values(3,'csirkehusos',600,40);
+insert into Pizza values(4,'hawai',400,33);
+
+insert into megrendeles values(to_date('2023.05.08','YYYY.MM.DD'),null,1);
+insert into megrendeles values(to_date('2022.07.26','YYYY.MM.DD'),null,2);
+insert into megrendeles values(to_date('2023.04.15','YYYY.MM.DD'),null,3);
+
+savepoint mysave;
+
+
+--4. feladat
+
+update megrendeles 
+set kiszallitas_datum = to_date('2023.05.08','YYYY.MM.DD')
+where megrendeles_datum = to_date('2023.05.08','YYYY.MM.DD');
+
+update megrendeles 
+set kiszallitas_datum = to_date('2022.07.26','YYYY.MM.DD')
+where megrendeles_datum = to_date('2022.07.26','YYYY.MM.DD');
+
+--5. feladat
+
+select * from megrendeles where kiszallitas_datum is null;
+delete from megrendeles where kiszallitas_datum is null;
+
+--6. feladat
+
+savepoint mysave2;
+
+update Pizza 
+set ar = ar*1.25
+where meret = 50;
+
+rollback mysave2;
+
+--7. feladat
+
+select count(*) from megrendeles where kiszallitas_datum is not null;
